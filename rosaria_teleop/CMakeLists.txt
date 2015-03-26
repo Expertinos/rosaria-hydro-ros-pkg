@@ -8,6 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
+  sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -93,9 +95,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(include ${catkin_INCLUDE_DIRS}
+${Boost_INCLUDE_DIRS})
 
 ## Declare a cpp library
 # add_library(rosaria_teleop
@@ -103,16 +104,19 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-# add_executable(rosaria_teleop_node src/rosaria_teleop_node.cpp)
+add_executable(rosaria_teleop_node 
+		src/teleop_node.cpp
+		src/teleop.cpp
+		)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(rosaria_teleop_node rosaria_teleop_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(rosaria_teleop_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(rosaria_teleop_node
+  ${catkin_LIBRARIES}
+  )
 
 #############
 ## Install ##
