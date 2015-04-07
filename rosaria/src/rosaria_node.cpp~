@@ -5,7 +5,7 @@ int main( int argc, char** argv )
   printf("INICIALIZANDO ROS/MAIN");
   ros::init(argc,argv, "RosAria");
   printf("NÓ");
-  ros::NodeHandle n(std::string("~"));
+  ros::NodeHandle n("~");
   printf("INICIALIZANDO ARIA");
   Aria::init();
 

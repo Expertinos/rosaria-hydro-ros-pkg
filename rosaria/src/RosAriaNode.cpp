@@ -4,7 +4,7 @@ void RosAriaNode::readParameters()
 {
   // Robot Parameters  
   robot->lock();
-  ros::NodeHandle n_;
+  ros::NodeHandle n_("~");
   if (n_.hasParam("TicksMM"))
   {
     n_.getParam( "TicksMM", TicksMM);
@@ -142,20 +142,23 @@ void RosAriaNode::sonarConnectCb()
 RosAriaNode::RosAriaNode(ros::NodeHandle nh) : 
   myPublishCB(this, &RosAriaNode::publish), serial_port(""), serial_baud(0), use_sonar(false)
 {
+  
   // read in config options
   n = nh;
 
+  ros::NodeHandle n_("~");
+
   // !!! port !!!
-  n.param( "port", serial_port, std::string("/dev/ttyUSB0") ); //"192.168.0.192:8101"
+  n_.param( "port", serial_port, std::string("/dev/ttyS0") ); //"192.168.0.192:8101"
   ROS_INFO( "RosAria: using port: [%s]", serial_port.c_str() );
 
-  n.param("baud", serial_baud, 0);
+  n_.param("baud", serial_baud, 0);
   if(serial_baud != 0)
   ROS_INFO("RosAria: using serial port baud rate %d", serial_baud);
 
   // handle debugging more elegantly
-  n.param( "debug_aria", debug_aria, false ); // default not to debug
-  n.param( "aria_log_filename", aria_log_filename, std::string("Aria.log") );
+  n_.param( "debug_aria", debug_aria, false ); // default not to debug
+  n_.param( "aria_log_filename", aria_log_filename, std::string("Aria.log") );
 
   // Figure out what frame_id's to use. if a tf_prefix param is specified,
   // it will be added to the beginning of the frame_ids.
@@ -166,7 +169,7 @@ RosAriaNode::RosAriaNode(ros::NodeHandle nh) :
   // rather than /odom. This is useful for Multi Robot Systems.
   // See ROS Wiki for further details.
   tf_prefix = tf::getPrefixParam(n);
-  frame_id_odom = tf::resolve(tf_prefix, "odom");
+  frame_id_odom = tf::resolve(tf_prefix, "/MyRobot/odom");
   frame_id_base_link = tf::resolve(tf_prefix, "base_link");
   frame_id_bumper = tf::resolve(tf_prefix, "bumpers_frame");
   frame_id_sonar = tf::resolve(tf_prefix, "sonar_frame");
@@ -176,7 +179,7 @@ RosAriaNode::RosAriaNode(ros::NodeHandle nh) :
   // other argmuments (optional) are callbacks, or a boolean "latch" flag (whether to send current data to new
   // subscribers when they subscribe).
   // See ros::NodeHandle API docs.
-  pose_pub = n.advertise<nav_msgs::Odometry>("/AmigoBot1/pose",1000);
+  pose_pub = n.advertise<nav_msgs::Odometry>("odom",1000);
   bumpers_pub = n.advertise<rosaria::BumperState>("bumper_state",1000);
   sonar_pub = n.advertise<sensor_msgs::PointCloud>("sonar", 50,
     boost::bind(&RosAriaNode::sonarConnectCb, this),
@@ -198,7 +201,7 @@ RosAriaNode::RosAriaNode(ros::NodeHandle nh) :
   // advertise enable/disable services
   enable_srv = n.advertiseService("enable_motors", &RosAriaNode::enable_motors_cb, this);
   disable_srv = n.advertiseService("disable_motors", &RosAriaNode::disable_motors_cb, this);
-  
+
   veltime = ros::Time::now();
 }
 
